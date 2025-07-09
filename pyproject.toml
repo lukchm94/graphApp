@@ -1,0 +1,25 @@
+[project]
+name = "graphApp"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Lukasz Chmielewski", email = "lukchm94@gmail.com"},
+]
+dependencies = [
+    "fastapi>=0.110.0,<1.0.0",  
+    "uvicorn[standard]>=0.27.0,<1.0.0",
+    "pydantic>=2.6.0,<3.0.0",
+    "neomodel>=5.1.2,<6.0.0"
+]
+requires-python = "==3.13.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+app = "uvicorn src.main:app --reload --host 127.0.0.1 --port 8001"
+start_db = "docker-compose up -d"
+kill_db = "docker-compose down -v"
