@@ -38,4 +38,5 @@ class PersonService:
         self.logger.info(
             f"Creating friendship from {person_email} to {friend_email} with level {level}"
         )
+        person = self.get_person_by_email(person_email)
         return self.repo.create_friendship(person_email, friend_email, level)
