@@ -1,7 +1,9 @@
 from logging import Logger
+from typing import Union
 
 from neomodel import DoesNotExist  # type: ignore
 
+from ....domain.friendship import FriendshipLevelEnum
 from ....domain.person import JobEnum, Person, ProfessionEnum
 from ....domain.person_repo import PersonRepository
 from .person_orm import Person as Neo4jPersonORM
@@ -27,12 +29,13 @@ class Neo4jPersonRepoImpl(PersonRepository):
         )
         try:
             person_orm.save()  # type: ignore
+            self.logger.info(f"Person {person.email} saved successfully.")
+            return True
         except Exception as e:
-            print(f"Error saving person: {e}")
+            self.logger.warning(f"Error saving person: {e}")
             return False  # or handle the exception as needed
-        return True
 
-    def get_by_email(self, email: str) -> Person:
+    def get_by_email(self, email: str) -> Union[Person, None]:
         """
         Retrieve a person by their email address from the Neo4j database.
         """
@@ -47,4 +50,22 @@ class Neo4jPersonRepoImpl(PersonRepository):
                 profession=ProfessionEnum(person_orm.profession),
             )
         except DoesNotExist:
-            raise ValueError(f"Person with email {email} does not exist.")
+            self.logger.info(f"Person with email {email} does not exist.")
+            return None
+
+    def create_friendship(
+        self, person: Neo4jPersonORM, friend: Neo4jPersonORM, level: FriendshipLevelEnum
+    ) -> bool:
+        """
+        Create a friendship between two persons in the Neo4j database.
+        """
+        try:
+            # Assuming Friendship is a relationship defined in your ORM
+            person.friends.connect(friend, {"level": level})  # type: ignore
+            self.logger.info(
+                f"Friendship created between {person.email} and {friend.email}."
+            )
+            return True
+        except DoesNotExist as e:
+            self.logger.warning(f"Error creating friendship: {e}")
+            return False
